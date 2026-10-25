@@ -40,4 +40,5 @@ results = client.get("vh55-3he6", limit=2000)
 # Convert to pandas DataFrame
 results_df = pd.DataFrame.from_records(results)
 
-print(results_df.head())
+results_df.to_csv("cdc_results.csv", index=False)
+

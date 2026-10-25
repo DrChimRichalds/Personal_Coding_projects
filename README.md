@@ -1,6 +1,7 @@
 # Personal_Coding_projects
 CDC Data and more
 
+<<<<<<< HEAD
 # CDC Vaccine Data Retrieval
 
 ## Overview
@@ -119,3 +120,9 @@ Potential next steps for this project include:
 ## Author
 
 Developed as a Python and biomedical data analysis learning project.
+=======
+#!/usr/bin/env python
+
+pip install pandas
+pip install sodapy
+>>>>>>> 31e40a68369aaa15efc0778bfdd8c5dec8dfa2f8
