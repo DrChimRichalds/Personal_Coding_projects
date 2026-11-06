@@ -3,13 +3,13 @@ import numpy as np
 
 
 
-CDC_results = pd.read_csv("data/raw/cdc_results.csv")
+CDC_results = pd.read_csv("data/raw/Full_CDC_Data_.csv")
 CDC_results_to_df = pd.DataFrame(CDC_results)
 #CDC_results_to_df.info()
 
-# ### Check quality of the data, and clean it up if necessary
+# # ### Check quality of the data, and clean it up if necessary
 
-# # Dataset overview
+# # # Dataset overview
 # print("Dataset dimensions:", CDC_results_to_df.shape)
 
 # # Number of rows and columns
@@ -51,7 +51,7 @@ CDC_results_to_df = pd.DataFrame(CDC_results)
 # print(missing_summary)
 
 
-# Display unique values in each object column
+# #Display unique values in each object column
 
 # for col in CDC_results_to_df.select_dtypes(include="object").columns:
 #     print(f"\n{col}")
@@ -77,7 +77,7 @@ CDC_results_to_df = pd.DataFrame(CDC_results)
 
 # print(duplicate_rows)
 
-# Convert coverage estimates to numeric
+# #Convert coverage estimates to numeric
 # CDC_results_to_df["coverage_estimate"] = pd.to_numeric(
 #     CDC_results_to_df["coverage_estimate"]
 #         .astype("string")
@@ -93,6 +93,64 @@ CDC_results_to_df = pd.DataFrame(CDC_results)
 
 # print(f"Invalid coverage estimates:\n{invalid_coverage}")
 
-### there is nothign to clean but I will write a clean version of a file to practice saving a cleaned version of the data.
 
-CDC_results_to_df.to_csv("data/processed/cdc_results_clean.csv", index=False)
+# def data_quality_report(df):
+
+#     report = pd.DataFrame(index=df.columns)
+
+#     # Data types
+#     report["Data_Type"] = df.dtypes.astype(str)
+
+#     # Missing values
+#     report["Missing_Count"] = df.isna().sum()
+
+#     # Percentage missing
+#     report["Missing_Percent"] = (
+#         df.isna().mean() * 100
+#     ).round(2)
+
+#     # Unique values
+#     report["Unique_Values"] = df.nunique(
+#         dropna=True
+#     )
+
+#     # Non-missing observations
+#     report["Non_Missing_Count"] = df.notna().sum()
+
+#     # Empty strings
+#     report["Blank_Strings"] = (
+#         df.select_dtypes(include="object")
+#         .apply(lambda x: x.str.strip().eq("").sum())
+#         .reindex(df.columns, fill_value=0)
+#     )
+
+#     # Sort by missing percentage
+#     report = report.sort_values(
+#         "Missing_Percent",
+#         ascending=False
+#     )
+
+#     return report
+
+
+# # Generate report
+# quality_report = data_quality_report(CDC_results_to_df)
+
+# print(quality_report)
+
+# # Export report
+# quality_report.to_csv(
+#     "CDC_data_quality_report.csv"
+# )
+
+
+print(
+    CDC_results_to_df["Vaccine"].value_counts(
+        dropna=False
+    )
+)
+
+## there is nothign to clean but I will write a clean version of a file to practice saving a cleaned version of the data.
+
+
+# CDC_results_to_df.to_csv("data/cleaned/Full_CDC_Data_Cleaned.csv", index=False)
