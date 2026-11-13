@@ -28,17 +28,19 @@ print(APP_TOKEN)
 #client = Socrata("data.cdc.gov", None)
 
 # Example authenticated client (needed for non-public datasets):
-client = Socrata("data.cdc.gov",
-                 APP_TOKEN,
-                 username=username,
-                 password=password)
+# client = Socrata("data.cdc.gov",
+#                  APP_TOKEN,
+#                  username=username,
+#                  password=password)
 
-# First 2000 results, returned as JSON from API / converted to Python list of
-# dictionaries by sodapy.
-results = client.get("vh55-3he6", limit=2000)
+# # First 2000 results, returned as JSON from API / converted to Python list of
+# # dictionaries by sodapy.
+# results = client.get("vh55-3he6", limit=2000)
 
-# Convert to pandas DataFrame
-results_df = pd.DataFrame.from_records(results)
+# # Convert to pandas DataFrame
+# results_df = pd.DataFrame.from_records(results)
 
-results_df.to_csv("cdc_results.csv", index=False)
+# results_df.to_csv("cdc_results.csv", index=False)
+
+
 

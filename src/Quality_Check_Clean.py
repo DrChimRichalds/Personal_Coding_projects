@@ -7,91 +7,83 @@ CDC_results = pd.read_csv("data/raw/Full_CDC_Data_.csv")
 CDC_results_to_df = pd.DataFrame(CDC_results)
 #CDC_results_to_df.info()
 
-# # ### Check quality of the data, and clean it up if necessary
+# ### Check quality of the data, and clean it up if necessary
 
-# # # Dataset overview
-# print("Dataset dimensions:", CDC_results_to_df.shape)
+# # Dataset overview
+# with open("CDC_data_quality_report.txt", "w") as f:
 
-# # Number of rows and columns
-# print("Rows:", CDC_results_to_df.shape[0])
-# print("Columns:", CDC_results_to_df.shape[1])
+#     f.write(f"Dataset dimensions: {CDC_results_to_df.shape}\n")
+#     f.write(f"Number of rows: {CDC_results_to_df.shape[0]}\n")
+#     f.write(f"Number of columns: {CDC_results_to_df.shape[1]}\n")
+#     f.write(f"Column names: {CDC_results_to_df.columns.tolist()}\n\n")
+#     f.write("Data types:\n")
+#     f.write(f"{CDC_results_to_df.dtypes}\n\n")
+#     f.write("Summary statistics:\n")
+#     f.write(f"{CDC_results_to_df.describe(include='all')}\n\n")
+#     f.write("Missing values:\n")
+#     f.write(f"{CDC_results_to_df.isnull().sum()}\n\n")
+#     f.write("Percentage of missing values:\n")
+#     f.write(f"{(CDC_results_to_df.isnull().mean() * 100).round(2)}\n\n")
+#     f.write("Unique values per column:\n")
+#     for col in CDC_results_to_df.columns:
+#         f.write(f"{col}: {CDC_results_to_df[col].nunique()}\n")
+#     f.write("Duplicate rows:\n")
+#     f.write(f"{CDC_results_to_df.duplicated(keep=False).sum()}\n\n")
+#     f.write("Duplicate rows details:\n")
+#     duplicate_rows = CDC_results_to_df[CDC_results_to_df.duplicated(keep=False)]
+#     f.write(f"{duplicate_rows}\n\n")
+#     f.write("Blank or whitespace-only strings per column:\n")
+#     blank_counts = (
+#         CDC_results_to_df.select_dtypes(include="object")
+#         .apply(lambda col: col.str.strip().eq("").sum())
+#     )
+#     f.write(f"{blank_counts}\n\n")  
+#     f.write("Identify values outside the expected range for 'Estimate (%)':\n")
+#     invalid_coverage = CDC_results_to_df[
+#         (CDC_results_to_df["Estimate (%)"] < 0) |  
+#         (CDC_results_to_df["Estimate (%)"] > 100)
+#     ]
+#     f.write(f"{invalid_coverage}\n\n")  
 
-# # Column names
-# print(CDC_results_to_df.columns.tolist())
 
-# # Data types and non-null counts
-# CDC_results_to_df.info()
+# f.close()
 
-# # Summary statistics
-# print(CDC_results_to_df.describe(include="all"))
+    
 
+# DF_AgeCoverage = CDC_results_to_df[[
+#     "Dimension Type",
+#     "Dimension",
+#     "Estimate (%)",
+# ]]
 
-# # Count missing values in each column
-# missing_values = CDC_results_to_df.isnull().sum()
-# print("Missing values in each column:\n", missing_values)
+# DF_AgeCoverage["Estimate (%)"] = DF_AgeCoverage["Estimate (%)"].str.replace('NR †', '', regex=False)
+# DF_AgeCoverage["Estimate (%)"] = DF_AgeCoverage["Estimate (%)"].str.replace('NR', '', regex=False)
+# DF_AgeCoverage["Estimate (%)"] = DF_AgeCoverage["Estimate (%)"].str.replace('†', '', regex=False)
+# DF_AgeCoverage["Estimate (%)"] = DF_AgeCoverage["Estimate (%)"].str.replace(' ', '', regex=False)
+# DF_AgeCoverage["Estimate (%)"] = DF_AgeCoverage["Estimate (%)"].str.replace('–', '', regex=False)
+# DF_AgeCoverage["Estimate (%)"] = DF_AgeCoverage["Estimate (%)"].str.replace('—', '', regex=False)
+# DF_AgeCoverage["Estimate (%)"] = DF_AgeCoverage["Estimate (%)"].str.replace('nan', '', regex=False)
+# DF_AgeCoverage["Estimate (%)"] = DF_AgeCoverage["Estimate (%)"].dropna()
+# DF_AgeCoverage["Estimate (%)"] = DF_AgeCoverage["Estimate (%)"].str.strip()
+# DF_AgeCoverage["Estimate (%)"] = pd.to_numeric(DF_AgeCoverage["Estimate (%)"], errors='coerce')
+# # print(DF_AgeCoverage.head())
 
-
-# # Calculate percentage of missing values
-# missing_percent = (
-#     CDC_results_to_df.isnull().mean() * 100
+# zero_summary = (
+#     DF_AgeCoverage.groupby("Dimension")["Estimate (%)"]
+#     .agg(
+#         Total="count",
+#         Zeros=lambda x: (x == 0).sum(),
+#         Mean="mean",
+#         Median="median"
+#     )
 # )
 
-# # Combine into a DataFrame
-# missing_summary = pd.DataFrame({
-#     "Missing_Count": missing_values,
-#     "Missing_Percent": missing_percent
-# })
-
-# # Sort from highest to lowest missingness
-# missing_summary = missing_summary.sort_values(
-#     by="Missing_Percent",
-#     ascending=False
+# zero_summary["Zero_Percent"] = (
+#     zero_summary["Zeros"] /
+#     zero_summary["Total"] * 100
 # )
 
-# print(missing_summary)
-
-
-# #Display unique values in each object column
-
-# for col in CDC_results_to_df.select_dtypes(include="object").columns:
-#     print(f"\n{col}")
-#     print(CDC_results_to_df[col].value_counts(dropna=False))
-
-# # Count blank or whitespace-only strings
-# blank_counts = (
-#     CDC_results_to_df.select_dtypes(include="object")
-#     .apply(lambda col: col.str.strip().eq("").sum())
-# )
-
-# print(blank_counts)
-
-# # Count duplicate rows
-# duplicates = CDC_results_to_df.duplicated().sum()
-
-# print("Number of duplicate rows:", duplicates)
-
-# # Display duplicates
-# duplicate_rows = CDC_results_to_df[
-#     CDC_results_to_df.duplicated(keep=False)
-# ]
-
-# print(duplicate_rows)
-
-# #Convert coverage estimates to numeric
-# CDC_results_to_df["coverage_estimate"] = pd.to_numeric(
-#     CDC_results_to_df["coverage_estimate"]
-#         .astype("string")
-#         .str.replace("%", "", regex=False),
-#     errors="coerce"
-# )
-
-# # Identify values outside the expected range
-# invalid_coverage = CDC_results_to_df[
-#     (CDC_results_to_df["coverage_estimate"] < 0) |
-#     (CDC_results_to_df["coverage_estimate"] > 100)
-# ]
-
-# print(f"Invalid coverage estimates:\n{invalid_coverage}")
+# print(zero_summary)
 
 
 # def data_quality_report(df):
@@ -144,13 +136,7 @@ CDC_results_to_df = pd.DataFrame(CDC_results)
 # )
 
 
-print(
-    CDC_results_to_df["Vaccine"].value_counts(
-        dropna=False
-    )
-)
-
-## there is nothign to clean but I will write a clean version of a file to practice saving a cleaned version of the data.
+## Begin cleaning the data, retain the values 
 
 
 # CDC_results_to_df.to_csv("data/cleaned/Full_CDC_Data_Cleaned.csv", index=False)

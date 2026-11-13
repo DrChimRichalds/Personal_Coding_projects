@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 #### I want to generate box plots and histograms of the of the data
 
-CDC_results = pd.read_csv("data/raw/cdc_results.csv")
+CDC_results = pd.read_csv("data/raw/Full_CDC_Data_.csv")
 CDC_results_to_df = pd.DataFrame(CDC_results)
 #CDC_results_to_df.info()
 
@@ -18,32 +18,17 @@ CDC_results_to_df = pd.DataFrame(CDC_results)
 # CDC_results_to_df['CI_lower'] = pd.to_numeric(CDC_results_to_df['CI_lower'], errors='coerce')
 # CDC_results_to_df['CI_upper'] = pd.to_numeric(CDC_results_to_df['CI_upper'], errors='coerce')
 
-### Geography based histogram 
-# geography = CDC_results_to_df["geography"]
+## Geography based histogram 
+# geography = CDC_results_to_df["Geography"]
 # geography.value_counts().plot(kind='bar', title='Geography Distribution')
 # plt.xlabel("Geography")
 # plt.ylabel("Count") 
 # plt.show()
 
-#print(CDC_results_to_df["dimension"].unique())
-
-### Creating a histogram of the coverage estimates for the dimension "18-64 Years not at High Risk"
-# DF_AgeCoverage[
-#     DF_AgeCoverage["dimension"] == "18-64 Years not at High Risk"
-# ]["coverage_estimate"].hist(
-#     bins=20,
-#     edgecolor="black"
-# )
-# plt.title("Histogram of Coverage Estimates for 18-64 Years not at High Risk Dimension")
-# plt.xlabel("Coverage Estimates", fontsize=15)
-# plt.xticks(rotation=45)
-# plt.ylabel("Frequency", fontsize=15)
-# plt.show()
 
 
 #Filtering the data to only include coverage estimates that are not null and are numeric
-# coverage_estimates = CDC_results_to_df["coverage_estimate"]
-# coverage_estimates = CDC_results_to_df["coverage_estimate"]
+# coverage_estimates = CDC_results_to_df["Estimate (%)"]
 # coverage_estimates = coverage_estimates.str.replace('NR †', '', regex=False)
 # coverage_estimates = coverage_estimates.str.replace('NR', '', regex=False)
 # coverage_estimates = coverage_estimates.str.replace('†', '', regex=False)
@@ -67,7 +52,7 @@ CDC_results_to_df = pd.DataFrame(CDC_results)
 # plt.locator_params(axis='x', nbins=5)
 # plt.show()
 
-# population_sample_sizes = CDC_results_to_df["population_sample_size"]
+# population_sample_sizes = CDC_results_to_df["Sample Size"]
 # population_sample_sizes = population_sample_sizes.dropna()
 # population_sample_sizes.info()
 
@@ -80,7 +65,13 @@ CDC_results_to_df = pd.DataFrame(CDC_results)
 # plt.ylabel("Frequency")
 # plt.show()
 
-#boxplot = population_sample_sizes.plot.box(title="Box Plot of Population Sample Sizes")
+##T this is not very helpful because the sample sizes are very large and the histogram is not very informative.
+# boxplot = CDC_results_to_df.boxplot(by = "Sample Size", grid = True)
+# print("Boxplot of Sample Sizes")
+# plt.title("Boxplot of Sample Sizes")
+# plt.xlabel("Sample Size")
+# plt.ylabel("Frequency")
+# plt.show()
 
 # confidence_intervals = CDC_results_to_df["_95_ci"]
 # conditional_intervals = confidence_intervals.str.replace('to', '', regex=False)
@@ -89,59 +80,131 @@ CDC_results_to_df = pd.DataFrame(CDC_results)
 # CDC_results_to_df.info()
 
 
-# DF_AgeCoverage = CDC_results_to_df[[
-#     "dimension_type",
-#     "dimension",
-#     "coverage_estimate",
-# ]]
+DF_AgeCoverage = CDC_results_to_df[[
+    "Dimension Type",
+    "Dimension",
+    "Estimate (%)",
+]]
 
-# DF_AgeCoverage["coverage_estimate"] = DF_AgeCoverage["coverage_estimate"].str.replace('NR †', '', regex=False)
-# DF_AgeCoverage["coverage_estimate"] = DF_AgeCoverage["coverage_estimate"].str.replace('NR', '', regex=False)
-# DF_AgeCoverage["coverage_estimate"] = DF_AgeCoverage["coverage_estimate"].str.replace('†', '', regex=False)
-# DF_AgeCoverage["coverage_estimate"] = DF_AgeCoverage["coverage_estimate"].str.replace(' ', '', regex=False)
-# DF_AgeCoverage["coverage_estimate"] = DF_AgeCoverage["coverage_estimate"].str.replace('–', '', regex=False)
-# DF_AgeCoverage["coverage_estimate"] = DF_AgeCoverage["coverage_estimate"].str.replace('—', '', regex=False)
-# DF_AgeCoverage["coverage_estimate"] = DF_AgeCoverage["coverage_estimate"].str.replace('nan', '', regex=False)
-# DF_AgeCoverage["coverage_estimate"] = DF_AgeCoverage["coverage_estimate"].dropna()
-# DF_AgeCoverage["coverage_estimate"] = DF_AgeCoverage["coverage_estimate"].str.strip()
-# DF_AgeCoverage["coverage_estimate"] = pd.to_numeric(DF_AgeCoverage["coverage_estimate"], errors='coerce')
+# Preserve original data
+DF_AgeCoverage["Estimate_Original"] = DF_AgeCoverage["Estimate (%)"]
+
+# Remove footnote symbols and whitespace
+clean_estimate = (
+    DF_AgeCoverage["Estimate (%)"]
+    .astype("string")
+    .str.replace("†", "", regex=False)
+    .str.replace("‡", "", regex=False)
+    .str.strip()
+)
+
+# Convert NR and other non-numeric entries to missing values
+clean_estimate = clean_estimate.replace(
+    ["NR", "N/A", "nan", ""], pd.NA
+)
+
+# Convert to numeric
+DF_AgeCoverage["Estimate (%)"] = pd.to_numeric(
+    clean_estimate, errors="coerce"
+)
+########
+
+
+# # Count numeric zeros
+# print(
+#     "Number of zero estimates:",
+#     (DF_AgeCoverage["Estimate (%)"] == 0).sum()
+# )
+
+# # Count missing values
+# print(
+#     "Number of missing estimates:",
+#     DF_AgeCoverage["Estimate (%)"].isna().sum()
+# )
+
+# # Inspect original values associated with zero estimates
+# zero_estimates = DF_AgeCoverage[
+#     DF_AgeCoverage["Estimate (%)"] == 0
+# ]
+
+# print(zero_estimates[
+#     ["Estimate_Original", "Estimate (%)"]
+# ])
 # print(DF_AgeCoverage.head())
+
+zero_estimates = DF_AgeCoverage[
+    DF_AgeCoverage["Estimate (%)"] == 0
+]
+
+print(zero_estimates["Estimate_Original"].value_counts(dropna=False))
 
 # fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
 # ### use this to examien the data for different dimensions of the data, and create histograms for each dimension
-# print(CDC_results_to_df["dimension"].unique())
+# print(CDC_results_to_df["Dimension"].unique())
+
+# dimensions = [
+#     'Black, Non-Hispanic',
+#                                                 'Hispanic',
+#                    'Other or Multiple Races, Non-Hispanic',
+#                                      'White, Non-Hispanic',
+#                                              '50-64 Years',
+#                                               '>=65 Years',
+#                                               '>=6 Months',
+#                                      '6 Months - 17 Years',
+#                                       '6 Months - 4 Years',
+#                                               '5-12 Years',
+#                                              '13-17 Years',
+#                                               '>=18 Years',
+#                                              '18-64 Years',
+#                                 '18-64 Years at High Risk',
+#                             '18-64 Years not at High Risk',
+#                                              '18-49 Years',
+#                                 '18-49 Years at High Risk',
+#                             '18-49 Years not at High Risk',
+#           'American Indian or Alaska Native, Non-Hispanic',
+#                                      'Asian, Non-Hispanic',
+#  '6 Months - 64 Years at High Risk (Initial Target Group)',
+#                                 '25-64 Years at High Risk',
+#                  '25-64 Years not in Initial Target Group',
+#                                                   'School',
+#                                          'Medical Setting',
+#                                           'Pharmacy/Store',
+#                                                'Workplace',
+#                                      'Non-Medical Setting',
+#                                'Greater than 18 Years flu',
+#                                'Greater than 6 Months flu',
+#                                               'Greater 65']
 
 # # Histogram 1
 # DF_AgeCoverage[
-#     DF_AgeCoverage["dimension"] == "Black, Non-Hispanic"
-# ]["coverage_estimate"].hist(
+#     DF_AgeCoverage["Dimension"] == "Hispanic"
+# ]["Estimate (%)"].hist(
 #     bins=20, edgecolor="black", ax=axes[0]
 # )
-# axes[0].set_title("Black, Non-Hispanic")
+# axes[0].set_title("Hispanic")
 
 # # Histogram 2
 # DF_AgeCoverage[
-#     DF_AgeCoverage["dimension"] == "Hispanic"
-# ]["coverage_estimate"].hist(
+#     DF_AgeCoverage["Dimension"] == "White, Non-Hispanic"
+# ]["Estimate (%)"].hist(
 #     bins=20, edgecolor="black", ax=axes[1]
 # )
-# axes[1].set_title("Hispanic")
+# axes[1].set_title("White, Non-Hispanic")
 
 # # Histogram 3
 # DF_AgeCoverage[
-#     DF_AgeCoverage["dimension"] == "White, Non-Hispanic"
-# ]["coverage_estimate"].hist(
+#     DF_AgeCoverage["Dimension"] == "Black, Non-Hispanic"
+# ]["Estimate (%)"].hist(
 #     bins=20, edgecolor="black", ax=axes[2]
 # )
-# axes[2].set_title("White, Non-Hispanic")
-# plt.title("Histogram of Coverage Estimates by Age Group")
+# axes[2].set_title("Black, Non-Hispanic")
 # plt.tight_layout()
 # plt.show()
 
 
 
 
-###Calculate summary statistics and create visualizations for the data , the most important statistic is vaccine coverage. 
+# ###Calculate summary statistics and create visualizations for the data , the most important statistic is vaccine coverage. 
 
 
