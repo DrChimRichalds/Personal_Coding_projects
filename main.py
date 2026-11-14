@@ -2,7 +2,7 @@
 import pandas as pd 
 import numpy as np
 import matplotlib.pyplot as plt
-
+import seaborn as sns
 
 #### I want to generate box plots and histograms of the of the data
 
@@ -84,6 +84,7 @@ DF_AgeCoverage = CDC_results_to_df[[
     "Dimension Type",
     "Dimension",
     "Estimate (%)",
+    "Month"
 ]]
 
 # Preserve original data
@@ -136,7 +137,71 @@ zero_estimates = DF_AgeCoverage[
     DF_AgeCoverage["Estimate (%)"] == 0
 ]
 
-print(zero_estimates["Estimate_Original"].value_counts(dropna=False))
+#print(zero_estimates["Estimate_Original"].value_counts(dropna=False))
+
+# print(zero_estimates.head())
+
+# print(
+#     zero_estimates.groupby("Dimension")["Estimate (%)"]
+#     .agg(["count"])
+# )
+
+race_groups = [
+    "Black, Non-Hispanic",
+    "Hispanic",
+    "White, Non-Hispanic"
+]
+
+race_data = DF_AgeCoverage[
+    DF_AgeCoverage["Dimension"].isin(race_groups)
+]
+
+# print(
+#     race_data.groupby("Dimension")["Estimate (%)"]
+#     .agg(
+#         Total="count",
+#         Exact_Zeros=lambda x: (x == 0).sum(),
+#         Near_Zero=lambda x: ((x > 0) & (x <= 5)).sum(),
+#         Minimum="min",
+#         Median="median",
+#         Maximum="max"
+#     )
+# )
+
+# near_zero_data = race_data[
+#     race_data["Estimate (%)"] <= 5
+# ]
+
+# print(
+#     near_zero_data.groupby(
+#         ["Dimension", "Month"]
+#     ).size()
+# )
+
+print(CDC_results_to_df["Vaccine"].unique())
+
+monthly_summary = (
+    race_data
+    .groupby(["Dimension", "Month"])["Estimate (%)"]
+    .agg(["count", "mean", "median"])
+    .reset_index()
+)
+
+#print(monthly_summary.to_string(index=False))
+
+sns.lineplot(
+    data=monthly_summary,
+    x="Month",
+    y="median",
+    hue="Dimension",
+    marker="o"
+)
+
+plt.xlabel("Month")
+plt.ylabel("Median Vaccination Coverage (%)")
+plt.title("Vaccination Coverage by Month and Race")
+plt.show()
+
 
 # fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
