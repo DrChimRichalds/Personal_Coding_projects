@@ -81,6 +81,7 @@ CDC_results_to_df = pd.DataFrame(CDC_results)
 
 
 DF_AgeCoverage = CDC_results_to_df[[
+    'Vaccine',
     "Dimension Type",
     "Dimension",
     "Estimate (%)",
@@ -178,30 +179,53 @@ race_data = DF_AgeCoverage[
 #     ).size()
 # )
 
-print(CDC_results_to_df["Vaccine"].unique())
+# print(CDC_results_to_df["Vaccine"].unique())
 
-monthly_summary = (
-    race_data
-    .groupby(["Dimension", "Month"])["Estimate (%)"]
-    .agg(["count", "mean", "median"])
-    .reset_index()
-)
+# monthly_summary = (
+#     race_data
+#     .groupby(["Dimension", "Month"])["Estimate (%)"]
+#     .agg(["count", "mean", "median"])
+#     .reset_index()
+# )
 
 #print(monthly_summary.to_string(index=False))
 
-sns.lineplot(
-    data=monthly_summary,
-    x="Month",
-    y="median",
-    hue="Dimension",
-    marker="o"
+# sns.lineplot(
+#     data=monthly_summary,
+#     x="Month",
+#     y="median",
+#     hue="Dimension",
+#     marker="o"
+# )
+
+# plt.xlabel("Month")
+# plt.ylabel("Median Vaccination Coverage (%)")
+# plt.title("Vaccination Coverage by Month and Race")
+# plt.show()
+
+seasonal_data = DF_AgeCoverage[
+    (DF_AgeCoverage["Vaccine"] == "Seasonal Influenza") &
+    (DF_AgeCoverage["Dimension"].isin([
+        "Black, Non-Hispanic",
+        "Hispanic",
+        "White, Non-Hispanic"
+    ]))
+].copy()
+
+print(seasonal_data.head())
+
+
+sns.boxplot(
+    data=seasonal_data,
+    x="Dimension",
+    y="Estimate (%)"
 )
 
-plt.xlabel("Month")
-plt.ylabel("Median Vaccination Coverage (%)")
-plt.title("Vaccination Coverage by Month and Race")
+plt.title("End-of-Season Influenza Vaccination Coverage by Race")
+plt.xlabel("Racial/Ethnic Group")
+plt.ylabel("Vaccination Coverage (%)")
+plt.xticks(rotation=15)
 plt.show()
-
 
 # fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
