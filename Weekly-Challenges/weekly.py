@@ -29,14 +29,18 @@ df.info()
 
 print("Number of missing estimates:", df['coverage_pct'].isnull().sum())
 print("Number of exact zero estimates:", (df['coverage_pct'] == '0%').sum())
-df['coverage_pct'] = df['coverage_pct'].replace(['NR †', '—', '', ' †'], pd.NA)
+df['coverage_pct'] = df['coverage_pct'].replace(['NR †', '—', ''], pd.NA)
+df['coverage_pct']=df['coverage_pct'].str.replace(" †", "", regex=False)
 df['coverage_pct'] = df['coverage_pct'].str.rstrip('%')
 df['coverage_pct'] = pd.to_numeric(
     df['coverage_pct'], errors="coerce"
 )
 
+print("Cleaned coverage estimates:")
+print(df['coverage_pct'])
+
 print("Number of values strictl between 0 and 1::", df['coverage_pct'].apply(lambda x: 0 < x < 1).sum())
 
-
+print("Mean of coverage estimates:", df['coverage_pct'].mean())
 
 #TODO: ##Calculate the mean of the reported county estimates. In one sentence, explain what that mean represents.
